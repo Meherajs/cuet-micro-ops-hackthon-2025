@@ -46,8 +46,6 @@ curl -X POST http://localhost:3000/v1/download/start \
 
 ## Hackathon Challenges
 
-> **See [EVALUATION.md](./EVALUATION.md) for detailed scoring criteria and submission guidelines.**
-
 | Challenge                           | Max Points | Difficulty |
 | ----------------------------------- | ---------- | ---------- |
 | Challenge 1: S3 Storage Integration | 15         | Medium     |
