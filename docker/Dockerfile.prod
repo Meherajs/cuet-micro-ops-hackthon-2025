@@ -5,11 +5,11 @@ WORKDIR /app
 # Copy package files first for better layer caching
 COPY package*.json ./
 
-# Configure npm for better network resilience
+# Configure npm for better network resilience, skip prepare scripts (husky is dev-only)
 RUN npm config set fetch-retries 5 && \
   npm config set fetch-retry-mintimeout 20000 && \
   npm config set fetch-retry-maxtimeout 120000 && \
-  npm install --omit=dev --prefer-offline --no-audit --no-fund
+  npm install --omit=dev --ignore-scripts --prefer-offline --no-audit --no-fund
 
 FROM node:24-alpine
 
