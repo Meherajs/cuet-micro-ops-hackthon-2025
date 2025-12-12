@@ -1,5 +1,7 @@
 # Delineate Hackathon Challenge - CUET Fest 2025
+
 [![CI](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml)
+
 ## The Scenario
 
 This microservice simulates a **real-world file download system** where processing times vary significantly:
@@ -598,13 +600,13 @@ npm run format        # Fix formatting issues
 
 The CI pipeline uses these environment variables for testing:
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `NODE_ENV` | `development` | Test environment mode |
-| `PORT` | `3000` | Server port |
-| `S3_BUCKET_NAME` | `""` | Empty for tests without S3 |
-| `REQUEST_TIMEOUT_MS` | `30000` | 30-second timeout |
-| `RATE_LIMIT_MAX_REQUESTS` | `100` | Rate limit for tests |
+| Variable                  | Value         | Purpose                    |
+| ------------------------- | ------------- | -------------------------- |
+| `NODE_ENV`                | `development` | Test environment mode      |
+| `PORT`                    | `3000`        | Server port                |
+| `S3_BUCKET_NAME`          | `""`          | Empty for tests without S3 |
+| `REQUEST_TIMEOUT_MS`      | `30000`       | 30-second timeout          |
+| `RATE_LIMIT_MAX_REQUESTS` | `100`         | Rate limit for tests       |
 
 ### For Contributors
 
@@ -628,12 +630,12 @@ When contributing to this project:
 
 ### Troubleshooting CI Failures
 
-| Issue | Solution |
-|-------|----------|
-| **Linting errors** | Run `npm run lint:fix` locally |
-| **Formatting errors** | Run `npm run format` locally |
-| **Test failures** | Check logs in Actions tab, run `npm run test:e2e` locally |
-| **Docker build fails** | Verify Dockerfile syntax and dependencies |
+| Issue                  | Solution                                                  |
+| ---------------------- | --------------------------------------------------------- |
+| **Linting errors**     | Run `npm run lint:fix` locally                            |
+| **Formatting errors**  | Run `npm run format` locally                              |
+| **Test failures**      | Check logs in Actions tab, run `npm run test:e2e` locally |
+| **Docker build fails** | Verify Dockerfile syntax and dependencies                 |
 
 ---
 
