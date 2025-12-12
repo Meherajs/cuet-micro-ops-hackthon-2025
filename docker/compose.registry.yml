@@ -7,7 +7,7 @@ name: delineate
 services:
   delineate-app:
     # Pull from Docker Hub instead of building
-    image: ${DOCKERHUB_USERNAME:-tamim2763}/delineate-hackathon:${IMAGE_TAG:-latest}
+    image: ${DOCKERHUB_USERNAME:-x08a8}/delineate-hackathon:${IMAGE_TAG:-latest}
     ports:
       - "3000:3000"
     environment:
