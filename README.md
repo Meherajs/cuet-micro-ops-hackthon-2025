@@ -1,5 +1,7 @@
 # Delineate Hackathon Challenge - CUET Fest 2025
 
+[![CI](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml)
+
 ## The Scenario
 
 This microservice simulates a **real-world file download system** where processing times vary significantly:
@@ -525,6 +527,117 @@ npm run test:e2e     # Run E2E tests
 npm run docker:dev   # Start with Docker (development)
 npm run docker:prod  # Start with Docker (production)
 ```
+
+---
+
+## CI/CD Pipeline
+
+[![CI](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml)
+
+This project uses **GitHub Actions** for continuous integration and continuous deployment. The pipeline automatically runs on every push and pull request to ensure code quality and functionality.
+
+### Pipeline Stages
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│    Lint     │───▶│    Test     │───▶│    Build    │
+│  - ESLint   │    │  - E2E      │    │  - Docker   │
+│  - Prettier │    │             │    │             │
+└─────────────┘    └─────────────┘    └─────────────┘
+```
+
+The pipeline consists of three sequential stages:
+
+1. **Lint Stage**
+   - Runs ESLint on source code (`npm run lint`)
+   - Checks code formatting with Prettier (`npm run format:check`)
+   - Fails if any linting or formatting issues are found
+
+2. **Test Stage**
+   - Runs E2E test suite (`npm run test:e2e`)
+   - Tests API endpoints and functionality
+   - Only runs if lint stage passes
+
+3. **Build Stage**
+   - Builds production Docker image
+   - Validates Dockerfile and build process
+   - Uses GitHub Actions cache for faster builds
+   - Only runs if all tests pass
+
+### Features
+
+- ✅ **Automatic triggers** on push to `main`/`master` and pull requests
+- ✅ **Dependency caching** for faster builds (~60% faster)
+- ✅ **Fail-fast** - stops on first error
+- ✅ **Docker layer caching** for optimized builds
+- ✅ **Status badges** showing real-time pipeline status
+
+### Running Tests Locally
+
+Before pushing your changes, run these commands locally to catch issues early:
+
+```bash
+# Run all checks (recommended)
+npm run lint && npm run format:check && npm run test:e2e
+
+# Or run individually:
+
+# 1. Check linting
+npm run lint
+
+# 2. Check formatting
+npm run format:check
+
+# 3. Run E2E tests
+npm run test:e2e
+
+# Fix issues automatically
+npm run lint:fix      # Fix linting issues
+npm run format        # Fix formatting issues
+```
+
+### CI Environment Variables
+
+The CI pipeline uses these environment variables for testing:
+
+| Variable                  | Value         | Purpose                    |
+| ------------------------- | ------------- | -------------------------- |
+| `NODE_ENV`                | `development` | Test environment mode      |
+| `PORT`                    | `3000`        | Server port                |
+| `S3_BUCKET_NAME`          | `""`          | Empty for tests without S3 |
+| `REQUEST_TIMEOUT_MS`      | `30000`       | 30-second timeout          |
+| `RATE_LIMIT_MAX_REQUESTS` | `100`         | Rate limit for tests       |
+
+### For Contributors
+
+When contributing to this project:
+
+1. **Fork the repository** and create a feature branch
+2. **Make your changes** and test locally first
+3. **Run linting and tests** before committing:
+   ```bash
+   npm run lint && npm run format:check && npm run test:e2e
+   ```
+4. **Commit with clear messages** following conventional commits
+5. **Push and create a pull request** - CI will automatically run
+6. **Ensure CI passes** before requesting review
+
+### Viewing CI Results
+
+- **Check the badge** at the top of this README for current status
+- **View detailed logs** at: https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions
+- **PR checks** show status directly in your pull request
+
+### Troubleshooting CI Failures
+
+| Issue                  | Solution                                                  |
+| ---------------------- | --------------------------------------------------------- |
+| **Linting errors**     | Run `npm run lint:fix` locally                            |
+| **Formatting errors**  | Run `npm run format` locally                              |
+| **Test failures**      | Check logs in Actions tab, run `npm run test:e2e` locally |
+| **Docker build fails** | Verify Dockerfile syntax and dependencies                 |
+
+---
 
 ## Project Structure
 
