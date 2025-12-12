@@ -14,8 +14,50 @@ services:
     environment:
       - NODE_ENV=development
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://delineate-jaeger:4318
+      - S3_ENDPOINT=http://delineate-minio:9000
+      - S3_ACCESS_KEY_ID=minio_admin
+      - S3_SECRET_ACCESS_KEY=minio_secret_key_2025
+      - S3_BUCKET_NAME=downloads
+      - S3_FORCE_PATH_STYLE=true
     depends_on:
-      - delineate-jaeger
+      delineate-minio:
+        condition: service_healthy
+      delineate-jaeger:
+        condition: service_started
+
+  delineate-minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minio_admin
+      - MINIO_ROOT_PASSWORD=minio_secret_key_2025
+      - MINIO_REGION=us-east-1
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  delineate-minio-init:
+    image: minio/mc:latest
+    depends_on:
+      delineate-minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set minio http://delineate-minio:9000 minio_admin minio_secret_key_2025; do
+        echo 'Waiting for MinIO...'
+        sleep 2
+      done;
+      mc mb minio/downloads --ignore-existing || true;
+      echo 'Bucket created successfully';
+      "
 
   delineate-jaeger:
     image: jaegertracing/all-in-one:latest
@@ -24,3 +66,6 @@ services:
       - "4318:4318"
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+
+volumes:
+  minio-data:
