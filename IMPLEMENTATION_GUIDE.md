@@ -930,11 +930,13 @@ frontend/
 #### 2. Technology Stack
 
 **Core Framework:**
+
 - React 18.3.1 with TypeScript
 - Vite 6.0.1 (build tool with HMR)
 - Tailwind CSS 3.4.15 (styling)
 
 **Observability:**
+
 - `@sentry/react` 8.38.0 - Error tracking & performance monitoring
 - `@opentelemetry/api` 1.9.0 - Tracing API
 - `@opentelemetry/sdk-trace-web` 1.28.0 - Web tracing SDK
@@ -943,10 +945,12 @@ frontend/
 - `@opentelemetry/exporter-trace-otlp-http` 0.55.0 - OTLP HTTP exporter
 
 **HTTP & State:**
+
 - Axios 1.7.9 (HTTP client with interceptors)
 - Zustand 5.0.2 (state management - to be used)
 
 **UI Components:**
+
 - Lucide React 0.462.0 (icons)
 - Recharts 2.15.0 (charts for metrics - to be used)
 
@@ -955,6 +959,7 @@ frontend/
 **Features Implemented:**
 
 ✅ **Error Tracking Configuration**
+
 - DSN-based initialization with environment detection
 - Custom `beforeSend` hook for trace ID correlation
 - Browser tracing integration
@@ -962,6 +967,7 @@ frontend/
 - Browser profiling integration
 
 ✅ **Error Capture Utilities**
+
 ```typescript
 // Automatic error capture with context
 captureError(error: Error, context?: Record<string, unknown>)
@@ -980,11 +986,13 @@ showReportDialog(eventId?: string)
 ```
 
 ✅ **Trace Correlation**
+
 - Automatic trace ID tagging on all errors
 - Global trace ID storage for cross-service correlation
 - Integration with OpenTelemetry trace context
 
 **Configuration:**
+
 ```env
 VITE_SENTRY_DSN=https://your-key@sentry.io/project-id
 VITE_SENTRY_ENVIRONMENT=development
@@ -998,17 +1006,20 @@ VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE=1.0
 **Features Implemented:**
 
 ✅ **Tracing Configuration**
+
 - WebTracerProvider with resource attributes
 - OTLP HTTP exporter to Jaeger
 - Batch span processor for performance
 - Zone.js context manager for async tracking
 
 ✅ **Automatic Instrumentation**
+
 - Fetch API instrumentation with CORS support
 - Document load instrumentation
 - Custom attribute injection on spans
 
 ✅ **Manual Instrumentation Utilities**
+
 ```typescript
 // Create custom spans for user actions
 createSpan<T>(
@@ -1029,11 +1040,13 @@ getTraceparentHeader(): string | undefined
 ```
 
 ✅ **W3C Trace Context Propagation**
+
 - Automatic generation of `traceparent` headers
 - Format: `00-{trace-id}-{span-id}-{flags}`
 - Propagated to all backend API calls
 
 **Configuration:**
+
 ```env
 VITE_OTEL_ENDPOINT=http://localhost:4318/v1/traces
 VITE_OTEL_SERVICE_NAME=download-service-ui
@@ -1046,21 +1059,25 @@ VITE_JAEGER_UI_URL=http://localhost:16686
 **Features Implemented:**
 
 ✅ **Axios Instance Configuration**
+
 - Base URL from environment
 - 30-second timeout
 - Content-Type JSON headers
 
 ✅ **Request Interceptor**
+
 - Automatic `traceparent` header injection
 - Custom `X-Trace-Id` header for correlation
 - Breadcrumb logging for all requests
 
 ✅ **Response Interceptor**
+
 - Automatic error capture in Sentry
 - Trace ID attachment to error responses
 - Breadcrumb logging for responses
 
 ✅ **API Methods with Tracing**
+
 ```typescript
 // Health check with auto-tracing
 api.getHealth(): Promise<HealthResponse>
@@ -1076,6 +1093,7 @@ api.startDownload(request: DownloadStartRequest)
 ```
 
 Each API method is wrapped in a custom span with attributes:
+
 - HTTP method
 - Route path
 - Request parameters
@@ -1086,12 +1104,14 @@ Each API method is wrapped in a custom span with attributes:
 **Features Implemented:**
 
 ✅ **React Error Boundary**
+
 - Catches React component errors
 - Automatic Sentry error reporting
 - Component stack trace capture
 - Trace ID display in error UI
 
 ✅ **User-Friendly Error UI**
+
 - Clear error message display
 - Trace ID shown for support reference
 - Action buttons:
@@ -1100,11 +1120,13 @@ Each API method is wrapped in a custom span with attributes:
   - "Go Home" - Navigate to home page
 
 ✅ **Development Features**
+
 - Component stack trace in development mode
 - Detailed error information
 - Collapsible debug information
 
 ✅ **HOC Wrapper**
+
 ```typescript
 withErrorBoundary<P>(
   Component: React.ComponentType<P>,
@@ -1117,6 +1139,7 @@ withErrorBoundary<P>(
 **Features Implemented:**
 
 ✅ **Health Status Dashboard**
+
 - Real-time API health monitoring
 - 5-second polling interval
 - Visual status indicators:
@@ -1126,6 +1149,7 @@ withErrorBoundary<P>(
   - Sentry Status (active/inactive)
 
 ✅ **Testing Tools**
+
 - "Test Sentry Error" button
   - Triggers intentional backend error
   - Captures error in Sentry
@@ -1138,6 +1162,7 @@ withErrorBoundary<P>(
   - Direct link to trace viewer
 
 ✅ **Trace ID Display**
+
 - Current trace ID shown in header (truncated)
 - Full trace ID shown in alerts
 - Jaeger deep-link generation
@@ -1147,6 +1172,7 @@ withErrorBoundary<P>(
 **Comprehensive TypeScript Types:**
 
 ✅ **API Response Types**
+
 - HealthResponse
 - DownloadCheckResponse
 - DownloadInitiateRequest/Response
@@ -1154,6 +1180,7 @@ withErrorBoundary<P>(
 - ErrorResponse
 
 ✅ **UI State Types**
+
 - DownloadJob
 - SentryError
 - Trace
@@ -1162,12 +1189,14 @@ withErrorBoundary<P>(
 #### 9. Styling & Configuration
 
 ✅ **Tailwind CSS**
+
 - Custom color palette (primary blues)
 - Utility components (card, badge, btn)
 - Responsive design system
 - Custom badge variants (success, error, warning, info)
 
 ✅ **Vite Configuration**
+
 - React plugin
 - Path aliases (`@/*`)
 - API proxy for development
@@ -1175,6 +1204,7 @@ withErrorBoundary<P>(
 - Code splitting (vendor, charts, observability)
 
 ✅ **TypeScript Configuration**
+
 - Strict mode enabled
 - Path aliases configured
 - React JSX support
@@ -1183,6 +1213,7 @@ withErrorBoundary<P>(
 #### 10. Documentation
 
 ✅ **Frontend README.md**
+
 - Quick start guide
 - Environment setup
 - Sentry configuration instructions
@@ -1200,23 +1231,23 @@ The implementation ensures complete trace correlation:
    ├─ Frontend creates span: "user.download_clicked"
    ├─ Generates trace-id: abc123...
    └─ Stores globally: window.__CURRENT_TRACE_ID__
-   
+
 2. API request sent to backend
    ├─ Headers injected by interceptor:
    │  ├─ traceparent: 00-abc123...-def456...-01
    │  └─ X-Trace-Id: abc123...
    └─ Fetch instrumentation creates child span
-   
+
 3. Backend receives request
    ├─ Extracts trace context from traceparent
    ├─ Continues trace with new span
    └─ Logs include: trace_id=abc123...
-   
+
 4. If error occurs in backend
    ├─ Error sent to Sentry
    ├─ Tagged with: trace_id=abc123...
    └─ Appears in frontend error with same trace ID
-   
+
 5. View in Jaeger UI
    ├─ Search by trace ID: abc123...
    ├─ See complete waterfall:
@@ -1304,6 +1335,7 @@ Total: ~1,544 lines of code
 ### Next Steps (Phases 2-7)
 
 **Phase 2: Core React Application (4-5 hours)**
+
 - Setup routing (React Router)
 - Create layout components
 - Implement state management
@@ -1311,6 +1343,7 @@ Total: ~1,544 lines of code
 - Add toast notification system
 
 **Phase 3: Dashboard Features (6-8 hours)**
+
 - Health Status Component
 - Download Jobs Component
 - Error Log Component
@@ -1318,24 +1351,28 @@ Total: ~1,544 lines of code
 - Performance Metrics Component
 
 **Phase 4: Advanced Observability (4-5 hours)**
+
 - Custom instrumentation
 - Performance monitoring (Web Vitals)
 - Advanced error correlation
 - Session replay configuration
 
 **Phase 5: Docker & Infrastructure (2-3 hours)**
+
 - Multi-stage Dockerfile
 - Nginx configuration
 - Update docker-compose.yml
 - Environment variable injection
 
 **Phase 6: Testing & Documentation (3-4 hours)**
+
 - Unit tests
 - Integration tests
 - E2E tests
 - Complete documentation
 
 **Phase 7: Polish & Optimization (2-3 hours)**
+
 - Responsive design
 - Dark mode
 - Performance optimization

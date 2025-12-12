@@ -155,7 +155,7 @@ Errors captured by Sentry are automatically tagged with trace IDs for correlatio
 
 ```typescript
 Sentry.captureException(error, {
-  tags: { trace_id: getCurrentTraceId() }
+  tags: { trace_id: getCurrentTraceId() },
 });
 ```
 
@@ -164,9 +164,13 @@ Sentry.captureException(error, {
 Create custom spans for user interactions:
 
 ```typescript
-createSpan('user.download_clicked', async (span) => {
-  await api.startDownload({ file_id: 12345 });
-}, { 'user.action': 'download' });
+createSpan(
+  'user.download_clicked',
+  async (span) => {
+    await api.startDownload({ file_id: 12345 });
+  },
+  { 'user.action': 'download' }
+);
 ```
 
 ## 🛠️ Available Scripts

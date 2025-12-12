@@ -58,11 +58,11 @@ function App() {
       'user.test_tracing',
       async () => {
         captureMessage('Testing OpenTelemetry trace propagation', 'info');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       },
       { 'test.type': 'tracing' }
     );
-    
+
     const jaegerUrl = import.meta.env.VITE_JAEGER_UI_URL || 'http://localhost:16686';
     alert(
       `Tracing test completed!\nTrace ID: ${traceId}\n\nView in Jaeger: ${jaegerUrl}/trace/${traceId}`
@@ -83,9 +83,7 @@ function App() {
               <div className="flex items-center gap-3">
                 <Download className="w-8 h-8 text-primary-600" />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Download Service Monitor
-                  </h1>
+                  <h1 className="text-2xl font-bold text-gray-900">Download Service Monitor</h1>
                   <p className="text-sm text-gray-500">
                     Real-time monitoring with Sentry & OpenTelemetry
                   </p>
@@ -112,7 +110,9 @@ function App() {
                   {loading ? (
                     <p className="text-lg font-semibold text-gray-400">Loading...</p>
                   ) : (
-                    <p className={`text-lg font-semibold ${getStatusColor(health?.status || 'unhealthy')}`}>
+                    <p
+                      className={`text-lg font-semibold ${getStatusColor(health?.status || 'unhealthy')}`}
+                    >
                       {health?.status || 'Unknown'}
                     </p>
                   )}
@@ -129,7 +129,9 @@ function App() {
                   {loading ? (
                     <p className="text-lg font-semibold text-gray-400">Loading...</p>
                   ) : (
-                    <p className={`text-lg font-semibold ${health?.storage.connected ? 'text-green-600' : 'text-red-600'}`}>
+                    <p
+                      className={`text-lg font-semibold ${health?.storage.connected ? 'text-green-600' : 'text-red-600'}`}
+                    >
                       {health?.storage.connected ? 'Connected' : 'Disconnected'}
                     </p>
                   )}
@@ -146,7 +148,9 @@ function App() {
                   {loading ? (
                     <p className="text-lg font-semibold text-gray-400">Loading...</p>
                   ) : (
-                    <p className={`text-lg font-semibold ${health?.observability.tracing ? 'text-green-600' : 'text-gray-400'}`}>
+                    <p
+                      className={`text-lg font-semibold ${health?.observability.tracing ? 'text-green-600' : 'text-gray-400'}`}
+                    >
                       {health?.observability.tracing ? 'Active' : 'Inactive'}
                     </p>
                   )}
@@ -163,7 +167,9 @@ function App() {
                   {loading ? (
                     <p className="text-lg font-semibold text-gray-400">Loading...</p>
                   ) : (
-                    <p className={`text-lg font-semibold ${health?.observability.sentry ? 'text-green-600' : 'text-gray-400'}`}>
+                    <p
+                      className={`text-lg font-semibold ${health?.observability.sentry ? 'text-green-600' : 'text-gray-400'}`}
+                    >
                       {health?.observability.sentry ? 'Active' : 'Inactive'}
                     </p>
                   )}
@@ -180,7 +186,8 @@ function App() {
             </h2>
             <div className="space-y-3 text-gray-600">
               <p>
-                The React frontend with observability foundation is now set up. Here's what's been implemented:
+                The React frontend with observability foundation is now set up. Here's what's been
+                implemented:
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>✅ React 18 with Vite and TypeScript</li>
@@ -210,10 +217,7 @@ function App() {
               >
                 {testingSentry ? 'Testing...' : 'Test Sentry Error'}
               </button>
-              <button
-                onClick={handleTracingTest}
-                className="btn btn-primary"
-              >
+              <button onClick={handleTracingTest} className="btn btn-primary">
                 Test Tracing
               </button>
               <a
@@ -229,9 +233,7 @@ function App() {
 
           {/* Next Steps */}
           <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">
-              📋 Next Steps (Phase 2-7)
-            </h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-2">📋 Next Steps (Phase 2-7)</h3>
             <ul className="list-disc list-inside space-y-1 text-blue-800 text-sm">
               <li>Build Dashboard components (Health, Downloads, Errors, Traces, Metrics)</li>
               <li>Implement download job management</li>

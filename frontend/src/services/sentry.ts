@@ -30,7 +30,7 @@ export function initSentry() {
     // Performance Monitoring
     tracesSampleRate: TRACES_SAMPLE_RATE,
     tracePropagationTargets: ['localhost', /^https:\/\/yourserver\.io\/api/],
-    
+
     // Session Replay
     replaysSessionSampleRate: REPLAYS_SESSION_SAMPLE_RATE,
     replaysOnErrorSampleRate: REPLAYS_ON_ERROR_SAMPLE_RATE,

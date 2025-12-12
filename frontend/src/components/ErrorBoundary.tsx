@@ -77,32 +77,26 @@ class ErrorBoundary extends Component<Props, State> {
           <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
             <div className="flex items-center gap-3 mb-6">
               <AlertCircle className="w-8 h-8 text-red-500" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Oops! Something went wrong
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Oops! Something went wrong</h1>
             </div>
 
             <div className="space-y-4">
               <p className="text-gray-600">
-                We're sorry, but something unexpected happened. Our team has been notified
-                and we're working to fix the issue.
+                We're sorry, but something unexpected happened. Our team has been notified and we're
+                working to fix the issue.
               </p>
 
               {this.state.error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <p className="text-sm font-semibold text-red-800 mb-2">Error Details:</p>
-                  <p className="text-sm text-red-700 font-mono">
-                    {this.state.error.toString()}
-                  </p>
+                  <p className="text-sm text-red-700 font-mono">{this.state.error.toString()}</p>
                 </div>
               )}
 
               {this.state.traceId && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm font-semibold text-blue-800 mb-2">Trace ID:</p>
-                  <p className="text-sm text-blue-700 font-mono break-all">
-                    {this.state.traceId}
-                  </p>
+                  <p className="text-sm text-blue-700 font-mono break-all">{this.state.traceId}</p>
                   <p className="text-xs text-blue-600 mt-2">
                     Use this ID when contacting support for faster assistance.
                   </p>
@@ -123,7 +117,7 @@ class ErrorBoundary extends Component<Props, State> {
                   Report Issue
                 </button>
                 <button
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => (window.location.href = '/')}
                   className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                 >
                   Go Home

@@ -56,7 +56,7 @@ export function initTelemetry() {
       instrumentations: [
         new FetchInstrumentation({
           propagateTraceHeaderCorsUrls: [
-            /.*/,  // Propagate trace headers to all origins
+            /.*/, // Propagate trace headers to all origins
           ],
           clearTimingResources: true,
           applyCustomAttributesOnSpan: (span, request) => {

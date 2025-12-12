@@ -76,7 +76,7 @@ apiClient.interceptors.response.use(
   (error: AxiosError<ErrorResponse>) => {
     // Error handling
     const traceId = getCurrentTraceId();
-    
+
     addBreadcrumb({
       category: 'http',
       message: `HTTP Error: ${error.message}`,
@@ -173,10 +173,7 @@ export const api = {
     return createSpan(
       'api.download.start',
       async () => {
-        const response = await apiClient.post<DownloadStartResponse>(
-          '/v1/download/start',
-          request
-        );
+        const response = await apiClient.post<DownloadStartResponse>('/v1/download/start', request);
         return response.data;
       },
       {
