@@ -2,31 +2,40 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
+# Copy package files first for better layer caching
 COPY package*.json ./
 
-RUN npm ci --only=production
+# Configure npm for better network resilience
+RUN npm config set fetch-retries 5 && \
+  npm config set fetch-retry-mintimeout 20000 && \
+  npm config set fetch-retry-maxtimeout 120000 && \
+  npm install --omit=dev --prefer-offline --no-audit --no-fund
 
 FROM node:24-alpine
 
-# Install tini for proper signal handling
-RUN apk add --no-cache tini
+# Install tini and wget in single layer
+RUN apk add --no-cache tini wget
 
 WORKDIR /app
 
-# Copy only production dependencies
+# Copy only production dependencies from builder
 COPY --from=builder /app/node_modules ./node_modules
+
+# Copy package files
 COPY package*.json ./
+
+# Copy source code (changes most frequently - last for cache efficiency)
 COPY src ./src
 
-# Use non-root user with specific UID
+# Use non-root user
 USER node
 
 EXPOSE 3000
 
-# Use tini as entrypoint for proper signal handling
+# Use tini for proper signal handling
 ENTRYPOINT ["/sbin/tini", "--"]
 
-# Run node directly instead of npm for faster startup and cleaner process tree
+# Run node directly
 CMD ["node", "--experimental-transform-types", "src/index.ts"]
 
 # Healthcheck
