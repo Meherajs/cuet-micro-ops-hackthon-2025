@@ -44,18 +44,21 @@ Replaced the placeholder S3 configuration with a fully functional MinIO setup:
 - Idempotent (won't fail on restarts)
 
 ✅ **Health Checks**
-- MinIO service health monitoring
+- MinIO healthcheck using native `/minio/health/live` endpoint
 - App waits for MinIO to be healthy before starting
+- Robust retry configuration (5 retries, 15s start period)
 
 ✅ **Proper Networking**
 - Services communicate via Docker Compose network
 - MinIO accessible from app container
+- S3_REGION properly configured across all services
 - Ports exposed for external access
 
 ✅ **Security**
-- Strong credentials (not defaults)
+- Strong credentials (not defaults: minio_admin/minio_secret_key_2025)
 - Environment variable configuration
 - Path-style S3 access enabled
+- MinIO console (9001) internal-only in production
 
 ---
 
@@ -108,6 +111,7 @@ curl -X POST http://localhost:3000/v1/download/check \
 ### Environment Variables (Auto-configured in Docker Compose)
 
 ```yaml
+S3_REGION: us-east-1
 S3_ENDPOINT: http://delineate-minio:9000
 S3_ACCESS_KEY_ID: minio_admin
 S3_SECRET_ACCESS_KEY: minio_secret_key_2025
@@ -122,7 +126,7 @@ delineate-minio:
   image: minio/minio:latest
   ports:
     - "9000:9000"  # S3 API
-    - "9001:9001"  # Web Console
+    - "9001:9001"  # Web Console (dev only, internal in prod)
   environment:
     - MINIO_ROOT_USER=minio_admin
     - MINIO_ROOT_PASSWORD=minio_secret_key_2025
@@ -131,10 +135,11 @@ delineate-minio:
   volumes:
     - minio-data:/data
   healthcheck:
-    test: ["CMD", "mc", "ready", "local"]
+    test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
     interval: 10s
     timeout: 5s
-    retries: 3
+    retries: 5
+    start_period: 15s
 ```
 
 ### Bucket Initialization
