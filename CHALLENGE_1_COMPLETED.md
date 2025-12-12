@@ -6,7 +6,7 @@ Successfully completed **Challenge 1: Self-Hosted S3 Storage Integration** using
 
 **Branch**: `feature/challenge-1-minio-integration`  
 **Status**: ✅ All 29 E2E tests passing  
-**Points**: 15/15  
+**Points**: 15/15
 
 ---
 
@@ -20,41 +20,47 @@ Replaced the placeholder S3 configuration with a fully functional MinIO setup:
 - **Image**: `minio/minio:latest`
 - **API Port**: 9000 (S3 endpoint)
 - **Console Port**: 9001 (Web UI)
-- **Credentials**: 
+- **Credentials**:
   - Username: `minio_admin`
   - Password: `minio_secret_key_2025`
 
 ### 2. Files Modified
 
 #### `docker/compose.dev.yml`
+
 - Added MinIO service with proper configuration
 - Added MinIO init service for automatic bucket creation
 - Updated app service to connect to MinIO
 - Added volume for data persistence
 
 #### `docker/compose.prod.yml`
+
 - Same MinIO configuration with production optimizations
 - Added restart policies for high availability
 
 ### 3. Key Features Implemented
 
 ✅ **Automatic Bucket Creation**
+
 - Bucket name: `downloads`
 - Created on startup using MinIO Client (`mc`)
 - Idempotent (won't fail on restarts)
 
 ✅ **Health Checks**
+
 - MinIO healthcheck using native `/minio/health/live` endpoint
 - App waits for MinIO to be healthy before starting
 - Robust retry configuration (5 retries, 15s start period)
 
 ✅ **Proper Networking**
+
 - Services communicate via Docker Compose network
 - MinIO accessible from app container
 - S3_REGION properly configured across all services
 - Ports exposed for external access
 
 ✅ **Security**
+
 - Strong credentials (not defaults: minio_admin/minio_secret_key_2025)
 - Environment variable configuration
 - Path-style S3 access enabled
@@ -125,8 +131,8 @@ S3_FORCE_PATH_STYLE: true
 delineate-minio:
   image: minio/minio:latest
   ports:
-    - "9000:9000"  # S3 API
-    - "9001:9001"  # Web Console (dev only, internal in prod)
+    - "9000:9000" # S3 API
+    - "9001:9001" # Web Console (dev only, internal in prod)
   environment:
     - MINIO_ROOT_USER=minio_admin
     - MINIO_ROOT_PASSWORD=minio_secret_key_2025
@@ -168,6 +174,7 @@ delineate-minio-init:
 ### E2E Test Suite: ✅ 29/29 PASS
 
 All tests passing including:
+
 - ✅ Health endpoint returns storage: "ok"
 - ✅ Root endpoint functional
 - ✅ Security headers present
@@ -180,6 +187,7 @@ All tests passing including:
 ### Manual Verification
 
 ✅ Docker services running:
+
 ```
 delineate-delineate-minio-1    Up (healthy)    0.0.0.0:9000-9001→9000-9001/tcp
 delineate-delineate-app-1      Up              3000/tcp
@@ -187,6 +195,7 @@ delineate-delineate-jaeger-1   Up              4318/tcp, 16686/tcp
 ```
 
 ✅ Bucket created:
+
 ```
 Bucket created successfully `minio/downloads`.
 ```
@@ -326,7 +335,7 @@ git push origin main
 **Date**: 2025-12-12  
 **Test Results**: 29/29 passing  
 **Production Ready**: Yes  
-**Merge Status**: On feature branch (ready to merge)  
+**Merge Status**: On feature branch (ready to merge)
 
 **Next Challenge Owner**: [Assign teammate for Challenge 2]
 
