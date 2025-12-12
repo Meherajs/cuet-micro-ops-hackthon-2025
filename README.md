@@ -639,6 +639,140 @@ When contributing to this project:
 
 ---
 
+## Security & Quality
+
+[![CodeQL](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/codeql.yml/badge.svg)](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/codeql.yml)
+[![Security Scanning](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/security.yml/badge.svg)](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/security.yml)
+
+This project implements comprehensive security scanning and quality checks to identify vulnerabilities early in the development process.
+
+### Automated Security Scanning
+
+The following security tools run automatically in the CI/CD pipeline:
+
+1. **CodeQL Analysis** (Weekly + on every push)
+   - Semantic code analysis for JavaScript/TypeScript
+   - Detects 200+ vulnerability patterns (SQL injection, XSS, path traversal, etc.)
+   - Results available in GitHub Security tab
+
+2. **Trivy Scanner** (Docker Images + Filesystem)
+   - Scans Docker images for OS and library vulnerabilities
+   - Filesystem scanning for dependency issues
+   - Configured to fail on CRITICAL vulnerabilities
+
+3. **npm audit** (Daily + on every push)
+   - Checks for known vulnerabilities in npm packages
+   - Configured with moderate severity threshold
+   - Automated security updates via `npm audit fix`
+
+4. **Dependency Review** (Pull Requests only)
+   - Analyzes new dependencies in PRs
+   - Blocks GPL-2.0 and LGPL-2.0 licenses
+   - Prevents introducing moderate+ vulnerabilities
+
+### Security Scripts
+
+Use these npm scripts for manual security checks:
+
+```bash
+# Run comprehensive security audit
+npm run security:audit
+
+# Run all security checks (audit + linting)
+npm run security:check
+
+# Auto-fix vulnerabilities and formatting
+npm run security:fix
+
+# Check for outdated packages
+npm run security:outdated
+
+# Clean install with security verification
+npm run security:install
+```
+
+### Manual Security Scanning
+
+#### Scan npm Dependencies
+
+```bash
+# Check for vulnerabilities
+npm audit --audit-level=moderate
+
+# Fix vulnerabilities automatically
+npm audit fix
+
+# Get detailed vulnerability report
+npm audit --json > npm-audit-report.json
+```
+
+#### Scan Docker Image with Trivy
+
+```bash
+# Build image first
+docker build -t delineate-app:latest -f docker/Dockerfile.prod .
+
+# Scan for vulnerabilities
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+  aquasec/trivy image --severity HIGH,CRITICAL delineate-app:latest
+
+# Generate SARIF report
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+  aquasec/trivy image --format sarif --output trivy-report.sarif delineate-app:latest
+```
+
+#### Scan Filesystem with Trivy
+
+```bash
+# Scan current directory
+docker run --rm -v $(pwd):/workspace aquasec/trivy fs /workspace
+
+# Scan specific directory
+docker run --rm -v $(pwd):/workspace aquasec/trivy fs /workspace/src
+```
+
+### Viewing Security Results
+
+- **CodeQL**: Go to repository **Security** tab → **Code scanning**
+- **Trivy**: View SARIF uploads in **Security** tab → **Code scanning**
+- **Dependabot**: Check **Security** tab → **Dependabot alerts**
+- **CI Logs**: View detailed reports in GitHub Actions logs
+
+### Security Best Practices
+
+This project follows these security practices:
+
+- ✅ **Minimal Docker images** - Using `node:24-slim` base image
+- ✅ **Non-root user** - Containers run as non-privileged user
+- ✅ **Input validation** - All API inputs validated with Zod schemas
+- ✅ **Rate limiting** - Configurable rate limits to prevent abuse
+- ✅ **Security headers** - HSTS, X-Frame-Options, CSP configured
+- ✅ **Path traversal protection** - S3 key validation prevents path attacks
+- ✅ **Request timeouts** - Prevents resource exhaustion
+- ✅ **Error sanitization** - Sensitive information not exposed in errors
+- ✅ **Dependency scanning** - Automated checks on every push
+- ✅ **Regular updates** - Scheduled security scans and updates
+
+### Vulnerability Response Policy
+
+When a vulnerability is detected:
+
+1. **CRITICAL**: Fix immediately, deploy hotfix within 24 hours
+2. **HIGH**: Fix within 7 days, include in next release
+3. **MODERATE**: Fix within 30 days, schedule for upcoming sprint
+4. **LOW**: Fix during regular maintenance cycles
+
+### Reporting Security Issues
+
+If you discover a security vulnerability, please:
+
+1. **Do NOT** open a public issue
+2. Email security concerns to repository maintainers
+3. Include detailed description and reproduction steps
+4. Allow 90 days for fix before public disclosure
+
+---
+
 ## Project Structure
 
 ```
