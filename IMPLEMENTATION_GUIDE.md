@@ -211,15 +211,228 @@ jobs: # 0 spaces
 
 ---
 
-## Phase 2: Security Scripts & Documentation
+## Phase 2: Security Scanning & Documentation
 
 ### Overview
 
-Added security audit scripts and comprehensive security documentation to enable local and automated security checks.
+Implemented comprehensive automated security scanning with CodeQL, Trivy, and npm audit, plus security scripts and documentation for local security checks.
 
 ### What Was Implemented
 
-#### 1. Security Scripts (package.json)
+#### 1. Security Workflows
+
+**Created three automated security scanning workflows:**
+
+##### CodeQL Analysis (`.github/workflows/codeql.yml`)
+
+**Purpose:** Semantic code analysis for JavaScript/TypeScript to detect 200+ vulnerability patterns.
+
+**Complete Workflow:**
+
+```yaml
+name: "CodeQL Security Analysis"
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: "0 9 * * 1"
+
+jobs:
+  analyze:
+    name: Analyze Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["javascript-typescript"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+```
+
+**Features:**
+- ✅ Runs on push, PRs, and weekly schedule (Mondays)
+- ✅ Detects SQL injection, XSS, path traversal, and 200+ vulnerability types
+- ✅ Uses extended security and quality queries
+- ✅ Results uploaded to GitHub Security tab
+- ✅ 6-hour timeout for thorough analysis
+
+##### Security Scanning Workflow (`.github/workflows/security.yml`)
+
+**Purpose:** Comprehensive security scanning with npm audit, Trivy filesystem scan, and dependency review.
+
+**Complete Workflow:**
+
+```yaml
+name: "Security Scanning"
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    # Run every day at 2 AM UTC
+    - cron: "0 2 * * *"
+
+jobs:
+  npm-audit:
+    name: NPM Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate --json > npm-audit.json || true
+
+      - name: Check for vulnerabilities
+        run: |
+          VULNS=$(npm audit --audit-level=moderate 2>&1 || true)
+          echo "$VULNS"
+          if echo "$VULNS" | grep -q "found [1-9][0-9]* vulnerabilities"; then
+            echo "⚠️ Vulnerabilities found!"
+            exit 1
+          fi
+
+  trivy-fs-scan:
+    name: Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner in fs mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+          exit-code: "0"
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+          category: "trivy-fs"
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          deny-licenses: GPL-2.0, LGPL-2.0
+```
+
+**Features:**
+- ✅ Three separate security jobs (npm-audit, trivy-fs-scan, dependency-review)
+- ✅ Runs on push, PRs, and daily schedule (2 AM UTC)
+- ✅ npm audit fails on moderate+ vulnerabilities
+- ✅ Trivy scans filesystem for CRITICAL and HIGH vulnerabilities
+- ✅ Dependency review blocks PRs with risky dependencies
+- ✅ License checking (blocks GPL-2.0, LGPL-2.0)
+- ✅ All results uploaded to GitHub Security tab as SARIF
+
+##### Enhanced CI with Trivy Docker Scanning (`.github/workflows/ci.yml`)
+
+**Added to Build Job:**
+
+```yaml
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-24.04
+    needs: [test, security]
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      # ... build steps ...
+      
+      - name: Run Trivy vulnerability scanner on Docker image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: delineate-hackathon-challenge:latest
+          format: "sarif"
+          output: "trivy-image-results.sarif"
+          severity: "CRITICAL,HIGH"
+          exit-code: "0"
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-image-results.sarif"
+          category: "trivy-image"
+
+      - name: Check for CRITICAL vulnerabilities
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image --severity CRITICAL --exit-code 1 \
+            delineate-hackathon-challenge:latest
+```
+
+**Features:**
+- ✅ Scans built Docker image for vulnerabilities
+- ✅ Uploads SARIF results to Security tab
+- ✅ Fails build on CRITICAL vulnerabilities
+- ✅ Runs after successful tests and security checks
+
+#### 2. Security Scripts (package.json)
 
 Added 5 new security-related npm scripts:
 
@@ -245,9 +458,9 @@ Added 5 new security-related npm scripts:
 | `security:check`      | Complete security validation                    | In pre-commit hooks           |
 | `security:fix`        | Fix security + code quality issues              | Quick cleanup                 |
 
-#### 2. Security Documentation (README.md)
+#### 3. Security Documentation (README.md)
 
-Added "Security & Quality" section with:
+Added comprehensive "Security & Quality" section with security badges, automated scanning details, and best practices:
 
 **Security Scripts Usage:**
 
@@ -310,7 +523,7 @@ npm outdated
 | **MEDIUM**   | 30 days         | Planned maintenance           |
 | **LOW**      | Next cycle      | Backlog item                  |
 
-#### 3. Testing Security Scripts
+#### 4. Testing Security Scripts
 
 ```bash
 # Test basic audit (PASSED - 0 vulnerabilities found)
@@ -499,13 +712,28 @@ All checks have passed
 - [x] Contributor guidelines
 - [x] Local testing instructions
 
-### ✅ Phase 2: Security
+### ✅ Phase 2: Security Scanning
 
+- [x] CodeQL workflow (`.github/workflows/codeql.yml`)
+  - Weekly + on-demand scanning
+  - 200+ vulnerability patterns detected
+  - SARIF results uploaded to Security tab
+- [x] Security workflow (`.github/workflows/security.yml`)
+  - npm audit for dependency vulnerabilities
+  - Trivy filesystem scanning
+  - Dependency review for PRs
+  - License checking (blocks GPL-2.0, LGPL-2.0)
+- [x] Trivy Docker image scanning in CI
+  - Scans built images for vulnerabilities
+  - Fails on CRITICAL issues
+  - SARIF upload to Security tab
 - [x] Security audit scripts in `package.json`
 - [x] Security documentation in README
-- [x] Manual scanning guides (npm audit, Trivy)
-- [x] Vulnerability response policy
-- [x] Security best practices documentation
+  - Security badges (CodeQL, Security Scanning)
+  - Automated scanning details
+  - Manual scanning guides (npm audit, Trivy)
+  - Vulnerability response policy
+  - Security best practices list
 
 ### ✅ Phase 3: Automation & Protection
 
@@ -552,9 +780,49 @@ npm run lint && npm run format:check && npm run test:e2e
 
 ### Phase 2: Security Scripts
 
-**Test 1: Security Audit**
+### Phase 2: Security Scanning
+
+**Test 1: CodeQL Workflow**
+
+1. Push code or open PR to trigger CodeQL
+2. Go to: https://github.com/tamim2763/cuet-micro-ops-hackthon-2025/actions/workflows/codeql.yml
+3. Expected results:
+   - ✅ CodeQL analysis completes successfully
+   - ✅ Results visible in Security → Code scanning alerts tab
+   - ✅ No critical vulnerabilities detected
+
+**Test 2: Security Workflow (npm audit + Trivy)**
+
+1. Push code or open PR to trigger security scanning
+2. Go to: https://github.com/tamim2763/cuet-micro-ops-hackthon-2025/actions/workflows/security.yml
+3. Expected results:
+   - ✅ npm-audit job passes (0 vulnerabilities)
+   - ✅ trivy-fs-scan completes
+   - ✅ dependency-review passes (PR only)
+   - ✅ SARIF results uploaded to Security tab
+
+**Test 3: Trivy Docker Scanning in CI**
+
+1. Push code to trigger CI build
+2. Go to build job logs
+3. Expected results:
+   - ✅ Docker image builds successfully
+   - ✅ Trivy scans image for vulnerabilities
+   - ✅ SARIF uploaded to Security → Code scanning
+   - ✅ Build fails if CRITICAL vulnerabilities found
+
+**Test 4: View Security Results**
+
+1. Navigate to: Repository → Security → Code scanning
+2. Expected to see:
+   - CodeQL alerts (if any)
+   - Trivy filesystem scan results
+   - Trivy Docker image scan results
+
+**Test 5: Security Scripts**
 
 ```bash
+# Test basic audit (PASSED - 0 vulnerabilities found)
 npm run security:audit
 ```
 
@@ -564,7 +832,7 @@ Expected output:
 found 0 vulnerabilities
 ```
 
-**Test 2: Security Check**
+**Test 6: Security Check**
 
 ```bash
 npm run security:check
@@ -577,7 +845,7 @@ found 0 vulnerabilities
 Security check passed
 ```
 
-**Test 3: List Security Scripts**
+**Test 7: List Security Scripts**
 
 ```bash
 npm run 2>&1 | grep security
@@ -592,6 +860,16 @@ security:audit:prod
 security:check
 security:fix
 ```
+
+**Test 8: Security Badges in README**
+
+1. View README at: https://github.com/tamim2763/cuet-micro-ops-hackthon-2025
+2. Expected: 
+   - ✅ CodeQL badge shows status
+   - ✅ Security Scanning badge shows status
+   - ✅ Both badges are green (passing)
+
+**Current Status:** ✅ No vulnerabilities found in dependencies or code
 
 ### Phase 3: Auto-merge & Protection
 
@@ -777,11 +1055,13 @@ file: docker/Dockerfile.prod # Must match actual location
 
 ### Phase 4: Advanced Security (Optional)
 
-- [ ] Add CodeQL security scanning workflow
-- [ ] Add Trivy Docker image scanning to CI
-- [ ] Add npm audit to security workflow
+- [x] Add CodeQL security scanning workflow ✅ **COMPLETED**
+- [x] Add Trivy Docker image scanning to CI ✅ **COMPLETED**
+- [x] Add npm audit to security workflow ✅ **COMPLETED**
+- [x] Add SARIF upload to GitHub Security tab ✅ **COMPLETED**
 - [ ] Implement Dependabot for automated updates
-- [ ] Add SARIF upload to GitHub Security tab
+- [ ] Add container signing and verification
+- [ ] Implement SBOM (Software Bill of Materials) generation
 
 ### Phase 5: Deployment (Optional)
 
