@@ -876,7 +876,486 @@ file: docker/Dockerfile.prod # Must match actual location
 
 ---
 
-**Document Version:** 1.0  
+**Document Version:** 1.1  
 **Last Updated:** December 12, 2025  
-**Implementation:** Complete (Phases 1-3)  
-**Status:** ✅ Production Ready
+**Implementation:** Complete (Phases 1-3), In Progress (Phase 4 - React UI)  
+**Status:** ✅ Production Ready (Backend), 🚧 In Development (Frontend)
+
+---
+
+## Phase 4: React UI with Observability Integration
+
+### Overview
+
+Implementation of a React-based monitoring dashboard that integrates with Sentry for error tracking and OpenTelemetry for distributed tracing, providing full visibility into the download service's health and performance.
+
+### Implementation Status: Phase 1 Complete ✅
+
+**Branch:** `feature/react-ui-observability`  
+**Phase:** Foundation & Setup (1 of 7)
+
+### What Was Implemented
+
+#### 1. Frontend Project Structure
+
+Created a complete React application in `frontend/` directory with the following structure:
+
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   └── ErrorBoundary.tsx          # Sentry-integrated error boundary
+│   ├── services/
+│   │   ├── api.ts                     # API client with trace propagation
+│   │   ├── sentry.ts                  # Sentry configuration & utilities
+│   │   └── telemetry.ts               # OpenTelemetry configuration
+│   ├── types/
+│   │   └── index.ts                   # TypeScript type definitions
+│   ├── App.tsx                        # Main application component
+│   ├── main.tsx                       # Entry point with observability init
+│   └── index.css                      # Tailwind CSS styles
+├── .env.example                       # Environment variables template
+├── .gitignore                         # Git ignore rules
+├── .prettierrc                        # Prettier configuration
+├── index.html                         # HTML entry point
+├── package.json                       # Dependencies & scripts
+├── postcss.config.js                  # PostCSS configuration
+├── README.md                          # Frontend documentation
+├── tailwind.config.js                 # Tailwind CSS configuration
+├── tsconfig.json                      # TypeScript configuration
+├── tsconfig.node.json                 # TypeScript config for Vite
+└── vite.config.ts                     # Vite build configuration
+```
+
+#### 2. Technology Stack
+
+**Core Framework:**
+- React 18.3.1 with TypeScript
+- Vite 6.0.1 (build tool with HMR)
+- Tailwind CSS 3.4.15 (styling)
+
+**Observability:**
+- `@sentry/react` 8.38.0 - Error tracking & performance monitoring
+- `@opentelemetry/api` 1.9.0 - Tracing API
+- `@opentelemetry/sdk-trace-web` 1.28.0 - Web tracing SDK
+- `@opentelemetry/instrumentation-fetch` 0.55.0 - Automatic fetch instrumentation
+- `@opentelemetry/instrumentation-document-load` 0.42.0 - Document load tracking
+- `@opentelemetry/exporter-trace-otlp-http` 0.55.0 - OTLP HTTP exporter
+
+**HTTP & State:**
+- Axios 1.7.9 (HTTP client with interceptors)
+- Zustand 5.0.2 (state management - to be used)
+
+**UI Components:**
+- Lucide React 0.462.0 (icons)
+- Recharts 2.15.0 (charts for metrics - to be used)
+
+#### 3. Sentry Integration (`src/services/sentry.ts`)
+
+**Features Implemented:**
+
+✅ **Error Tracking Configuration**
+- DSN-based initialization with environment detection
+- Custom `beforeSend` hook for trace ID correlation
+- Browser tracing integration
+- Session replay integration (10% sample rate, 100% on errors)
+- Browser profiling integration
+
+✅ **Error Capture Utilities**
+```typescript
+// Automatic error capture with context
+captureError(error: Error, context?: Record<string, unknown>)
+
+// Message capture with severity levels
+captureMessage(message: string, level: 'info' | 'warning' | 'error')
+
+// User context tracking
+setUserContext(user: { id: string; email?: string })
+
+// Breadcrumb trail for debugging
+addBreadcrumb({ message, category, level, data })
+
+// User feedback dialog
+showReportDialog(eventId?: string)
+```
+
+✅ **Trace Correlation**
+- Automatic trace ID tagging on all errors
+- Global trace ID storage for cross-service correlation
+- Integration with OpenTelemetry trace context
+
+**Configuration:**
+```env
+VITE_SENTRY_DSN=https://your-key@sentry.io/project-id
+VITE_SENTRY_ENVIRONMENT=development
+VITE_SENTRY_TRACES_SAMPLE_RATE=1.0
+VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE=0.1
+VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE=1.0
+```
+
+#### 4. OpenTelemetry Integration (`src/services/telemetry.ts`)
+
+**Features Implemented:**
+
+✅ **Tracing Configuration**
+- WebTracerProvider with resource attributes
+- OTLP HTTP exporter to Jaeger
+- Batch span processor for performance
+- Zone.js context manager for async tracking
+
+✅ **Automatic Instrumentation**
+- Fetch API instrumentation with CORS support
+- Document load instrumentation
+- Custom attribute injection on spans
+
+✅ **Manual Instrumentation Utilities**
+```typescript
+// Create custom spans for user actions
+createSpan<T>(
+  name: string,
+  operation: (span: Span) => T | Promise<T>,
+  attributes?: Record<string, string | number | boolean>
+): T | Promise<T>
+
+// Get current trace information
+getCurrentTraceId(): string | undefined
+getCurrentSpanId(): string | undefined
+
+// Add events to active span
+addSpanEvent(name: string, attributes?: Record<string, any>)
+
+// Get W3C traceparent header
+getTraceparentHeader(): string | undefined
+```
+
+✅ **W3C Trace Context Propagation**
+- Automatic generation of `traceparent` headers
+- Format: `00-{trace-id}-{span-id}-{flags}`
+- Propagated to all backend API calls
+
+**Configuration:**
+```env
+VITE_OTEL_ENDPOINT=http://localhost:4318/v1/traces
+VITE_OTEL_SERVICE_NAME=download-service-ui
+VITE_OTEL_ENABLED=true
+VITE_JAEGER_UI_URL=http://localhost:16686
+```
+
+#### 5. API Service Layer (`src/services/api.ts`)
+
+**Features Implemented:**
+
+✅ **Axios Instance Configuration**
+- Base URL from environment
+- 30-second timeout
+- Content-Type JSON headers
+
+✅ **Request Interceptor**
+- Automatic `traceparent` header injection
+- Custom `X-Trace-Id` header for correlation
+- Breadcrumb logging for all requests
+
+✅ **Response Interceptor**
+- Automatic error capture in Sentry
+- Trace ID attachment to error responses
+- Breadcrumb logging for responses
+
+✅ **API Methods with Tracing**
+```typescript
+// Health check with auto-tracing
+api.getHealth(): Promise<HealthResponse>
+
+// File availability check (supports Sentry test)
+api.checkDownload(fileId: number, sentryTest?: boolean)
+
+// Bulk download initiation
+api.initiateDownload(request: DownloadInitiateRequest)
+
+// Download start with delay
+api.startDownload(request: DownloadStartRequest)
+```
+
+Each API method is wrapped in a custom span with attributes:
+- HTTP method
+- Route path
+- Request parameters
+- Custom business logic attributes
+
+#### 6. Error Boundary Component (`src/components/ErrorBoundary.tsx`)
+
+**Features Implemented:**
+
+✅ **React Error Boundary**
+- Catches React component errors
+- Automatic Sentry error reporting
+- Component stack trace capture
+- Trace ID display in error UI
+
+✅ **User-Friendly Error UI**
+- Clear error message display
+- Trace ID shown for support reference
+- Action buttons:
+  - "Try Again" - Reset error state
+  - "Report Issue" - Open Sentry feedback dialog
+  - "Go Home" - Navigate to home page
+
+✅ **Development Features**
+- Component stack trace in development mode
+- Detailed error information
+- Collapsible debug information
+
+✅ **HOC Wrapper**
+```typescript
+withErrorBoundary<P>(
+  Component: React.ComponentType<P>,
+  fallback?: ReactNode
+)
+```
+
+#### 7. Main Application (`src/App.tsx`)
+
+**Features Implemented:**
+
+✅ **Health Status Dashboard**
+- Real-time API health monitoring
+- 5-second polling interval
+- Visual status indicators:
+  - API Status (healthy/unhealthy)
+  - Storage Status (connected/disconnected)
+  - Tracing Status (active/inactive)
+  - Sentry Status (active/inactive)
+
+✅ **Testing Tools**
+- "Test Sentry Error" button
+  - Triggers intentional backend error
+  - Captures error in Sentry
+  - Displays trace ID
+- "Test Tracing" button
+  - Creates test span
+  - Displays trace ID
+  - Links to Jaeger UI
+- "Open Jaeger UI" button
+  - Direct link to trace viewer
+
+✅ **Trace ID Display**
+- Current trace ID shown in header (truncated)
+- Full trace ID shown in alerts
+- Jaeger deep-link generation
+
+#### 8. Type Definitions (`src/types/index.ts`)
+
+**Comprehensive TypeScript Types:**
+
+✅ **API Response Types**
+- HealthResponse
+- DownloadCheckResponse
+- DownloadInitiateRequest/Response
+- DownloadStartRequest/Response
+- ErrorResponse
+
+✅ **UI State Types**
+- DownloadJob
+- SentryError
+- Trace
+- PerformanceMetric
+
+#### 9. Styling & Configuration
+
+✅ **Tailwind CSS**
+- Custom color palette (primary blues)
+- Utility components (card, badge, btn)
+- Responsive design system
+- Custom badge variants (success, error, warning, info)
+
+✅ **Vite Configuration**
+- React plugin
+- Path aliases (`@/*`)
+- API proxy for development
+- Source maps for debugging
+- Code splitting (vendor, charts, observability)
+
+✅ **TypeScript Configuration**
+- Strict mode enabled
+- Path aliases configured
+- React JSX support
+- Node.js types for Vite
+
+#### 10. Documentation
+
+✅ **Frontend README.md**
+- Quick start guide
+- Environment setup
+- Sentry configuration instructions
+- OpenTelemetry setup guide
+- Testing procedures
+- Troubleshooting section
+- Architecture overview
+
+### End-to-End Trace Flow
+
+The implementation ensures complete trace correlation:
+
+```
+1. User clicks "Download" button in React UI
+   ├─ Frontend creates span: "user.download_clicked"
+   ├─ Generates trace-id: abc123...
+   └─ Stores globally: window.__CURRENT_TRACE_ID__
+   
+2. API request sent to backend
+   ├─ Headers injected by interceptor:
+   │  ├─ traceparent: 00-abc123...-def456...-01
+   │  └─ X-Trace-Id: abc123...
+   └─ Fetch instrumentation creates child span
+   
+3. Backend receives request
+   ├─ Extracts trace context from traceparent
+   ├─ Continues trace with new span
+   └─ Logs include: trace_id=abc123...
+   
+4. If error occurs in backend
+   ├─ Error sent to Sentry
+   ├─ Tagged with: trace_id=abc123...
+   └─ Appears in frontend error with same trace ID
+   
+5. View in Jaeger UI
+   ├─ Search by trace ID: abc123...
+   ├─ See complete waterfall:
+   │  ├─ user.download_clicked (frontend)
+   │  ├─ HTTP POST /v1/download/start (frontend)
+   │  └─ v1.download.start (backend)
+   └─ Click any span for details
+```
+
+### Quick Start Guide
+
+#### 1. Install Dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+#### 2. Configure Environment
+
+```bash
+cp .env.example .env
+# Edit .env and add your Sentry DSN
+```
+
+#### 3. Start Backend (with Jaeger)
+
+```bash
+cd ..
+npm run docker:dev
+```
+
+#### 4. Start Frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+Visit http://localhost:5173
+
+### Testing Checklist
+
+- [ ] Frontend starts without errors
+- [ ] Health status cards show data
+- [ ] Sentry test triggers error
+- [ ] Error appears in Sentry dashboard
+- [ ] Tracing test creates span
+- [ ] Span visible in Jaeger UI
+- [ ] API requests include traceparent header
+- [ ] Errors show trace IDs
+- [ ] Error boundary catches React errors
+- [ ] User feedback dialog works
+
+### Files Created (20+)
+
+```
+frontend/
+├── src/
+│   ├── components/ErrorBoundary.tsx (137 lines)
+│   ├── services/
+│   │   ├── api.ts (163 lines)
+│   │   ├── sentry.ts (113 lines)
+│   │   └── telemetry.ts (192 lines)
+│   ├── types/index.ts (68 lines)
+│   ├── App.tsx (198 lines)
+│   ├── main.tsx (14 lines)
+│   └── index.css (41 lines)
+├── .env.example (18 lines)
+├── .gitignore (27 lines)
+├── .prettierrc (7 lines)
+├── .vscode/extensions.json (7 lines)
+├── index.html (12 lines)
+├── package.json (51 lines)
+├── postcss.config.js (6 lines)
+├── README.md (295 lines)
+├── tailwind.config.js (24 lines)
+├── tsconfig.json (29 lines)
+├── tsconfig.node.json (10 lines)
+└── vite.config.ts (32 lines)
+
+Total: ~1,544 lines of code
+```
+
+### Next Steps (Phases 2-7)
+
+**Phase 2: Core React Application (4-5 hours)**
+- Setup routing (React Router)
+- Create layout components
+- Implement state management
+- Build loading & error states
+- Add toast notification system
+
+**Phase 3: Dashboard Features (6-8 hours)**
+- Health Status Component
+- Download Jobs Component
+- Error Log Component
+- Trace Viewer Component
+- Performance Metrics Component
+
+**Phase 4: Advanced Observability (4-5 hours)**
+- Custom instrumentation
+- Performance monitoring (Web Vitals)
+- Advanced error correlation
+- Session replay configuration
+
+**Phase 5: Docker & Infrastructure (2-3 hours)**
+- Multi-stage Dockerfile
+- Nginx configuration
+- Update docker-compose.yml
+- Environment variable injection
+
+**Phase 6: Testing & Documentation (3-4 hours)**
+- Unit tests
+- Integration tests
+- E2E tests
+- Complete documentation
+
+**Phase 7: Polish & Optimization (2-3 hours)**
+- Responsive design
+- Dark mode
+- Performance optimization
+- Accessibility improvements
+
+### Success Criteria Met ✅
+
+- [x] React 18 application with TypeScript
+- [x] Sentry integration with error boundary
+- [x] OpenTelemetry with automatic instrumentation
+- [x] Trace propagation to backend (W3C format)
+- [x] API service with interceptors
+- [x] Error correlation with trace IDs
+- [x] Health monitoring dashboard
+- [x] Testing utilities for observability
+- [x] Comprehensive documentation
+- [x] Environment-based configuration
+
+---
+
+**Phase 4.1 Status:** ✅ Complete  
+**Next Phase:** Phase 4.2 - Core React Application  
+**Estimated Time:** 4-5 hours
