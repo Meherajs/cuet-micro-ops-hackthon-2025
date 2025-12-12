@@ -18,7 +18,8 @@
     "security:audit:fix": "npm audit fix",
     "security:audit:prod": "npm audit --omit=dev --audit-level=high",
     "security:check": "npm run security:audit && echo 'Security check passed'",
-    "security:fix": "npm audit fix && npm run lint:fix && npm run format"
+    "security:fix": "npm audit fix && npm run lint:fix && npm run format",
+    "prepare": "husky"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.948.0",
@@ -36,9 +37,26 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "@hono/eslint-config": "^2.0.3",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/node": "^24.10.2",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
+    "semantic-release": "^25.0.2",
     "typescript": "^5.8.3"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

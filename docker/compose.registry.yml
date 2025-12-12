@@ -1,0 +1,88 @@
+# Production compose file for registry-based deployment
+# Uses pre-built images from Docker Hub instead of building locally
+# Usage: docker compose -f docker/compose.registry.yml up -d
+
+name: delineate
+
+services:
+  delineate-app:
+    # Pull from Docker Hub instead of building
+    image: ${DOCKERHUB_USERNAME:-tamim2763}/delineate-hackathon:${IMAGE_TAG:-latest}
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - S3_REGION=${S3_REGION:-us-east-1}
+      - S3_ENDPOINT=http://delineate-minio:9000
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-minio_admin}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-minio_secret_key_2025}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-downloads}
+      - S3_FORCE_PATH_STYLE=true
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    depends_on:
+      delineate-minio:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/health",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  delineate-minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      # Console port 9001 is internal-only for security
+    environment:
+      - MINIO_ROOT_USER=${S3_ACCESS_KEY_ID:-minio_admin}
+      - MINIO_ROOT_PASSWORD=${S3_SECRET_ACCESS_KEY:-minio_secret_key_2025}
+      - MINIO_REGION=${S3_REGION:-us-east-1}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  delineate-minio-init:
+    image: minio/mc:latest
+    depends_on:
+      delineate-minio:
+        condition: service_healthy
+    environment:
+      - MINIO_ACCESS_KEY=${S3_ACCESS_KEY_ID:-minio_admin}
+      - MINIO_SECRET_KEY=${S3_SECRET_ACCESS_KEY:-minio_secret_key_2025}
+    entrypoint: >
+      /bin/sh -c "
+        until mc alias set minio http://delineate-minio:9000 $${MINIO_ACCESS_KEY} $${MINIO_SECRET_KEY}; do
+          echo 'Waiting for MinIO...'
+          sleep 2
+        done
+        mc mb minio/downloads --ignore-existing || true
+        echo 'Bucket created successfully'
+      "
+    restart: "no"
+
+volumes:
+  minio-data:

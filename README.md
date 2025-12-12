@@ -1,6 +1,6 @@
 # Delineate Hackathon Challenge - CUET Fest 2025
 
-[![CI](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml)
+[![CI](https://github.com/tamim2763/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/tamim2763/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml)
 
 ## The Scenario
 
@@ -532,7 +532,7 @@ npm run docker:prod  # Start with Docker (production)
 
 ## CI/CD Pipeline
 
-[![CI](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml)
+[![CI](https://github.com/tamim2763/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/tamim2763/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml)
 
 This project uses **GitHub Actions** for continuous integration and continuous deployment. The pipeline automatically runs on every push and pull request to ensure code quality and functionality.
 

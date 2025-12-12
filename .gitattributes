@@ -1,0 +1,22 @@
+# Git attributes for consistent behavior across platforms
+* text=auto eol=lf
+
+# Windows-specific files
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+
+# Lock files - exact
+package-lock.json -diff

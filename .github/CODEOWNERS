@@ -1,0 +1,19 @@
+# CODEOWNERS - Auto-assign reviewers based on file paths
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @tamim2763
+
+# Docker configuration
+/docker/ @tamim2763
+Dockerfile* @tamim2763
+docker-compose* @tamim2763
+
+# CI/CD workflows
+/.github/ @tamim2763
+
+# Source code
+/src/ @tamim2763
+
+# Scripts
+/scripts/ @tamim2763

@@ -1,0 +1,84 @@
+version: 2
+updates:
+  # npm dependencies - grouped by type to reduce PR noise
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Dhaka"
+    open-pull-requests-limit: 10
+    # Group related updates together
+    groups:
+      # Production dependencies - group by category
+      aws-sdk:
+        patterns:
+          - "@aws-sdk/*"
+        update-types:
+          - "minor"
+          - "patch"
+      hono-ecosystem:
+        patterns:
+          - "hono"
+          - "@hono/*"
+        update-types:
+          - "minor"
+          - "patch"
+      opentelemetry:
+        patterns:
+          - "@opentelemetry/*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Dev dependencies - less critical, group all
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      # Patch updates - low risk, group together
+      patch-updates:
+        update-types:
+          - "patch"
+    # Ignore major updates for stability (review manually)
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automerge"
+    reviewers:
+      - "tamim2763"
+
+  # GitHub Actions - keep up to date for security
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci(deps)"
+    labels:
+      - "ci"
+      - "automerge"
+
+  # Docker base images - security critical
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "build(deps)"
+    labels:
+      - "docker"
