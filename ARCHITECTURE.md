@@ -20,24 +20,24 @@ sequenceDiagram
     participant Worker as Background Worker
     participant S3 as MinIO S3
 
-    User->>API: POST /v1/download/initiate {file_ids}
-    API->>Redis: Create job record (status: pending)
+    User->>API: POST /v1/download/initiate
+    API->>Redis: Create job record
     API->>Queue: Enqueue download job
-    API-->>User: 201 {jobId, status: pending}
+    API-->>User: 201 Created with jobId
 
     User->>API: GET /v1/download/status/:jobId
     API->>Redis: Fetch job status
-    API-->>User: 200 {status: processing, progress: 45%}
+    API-->>User: 200 OK status processing
 
     Queue->>Worker: Dequeue job
-    Worker->>S3: Process files (10-120s)
+    Worker->>S3: Process files 10-120s
     S3-->>Worker: Files ready
     Worker->>S3: Generate presigned URL
-    Worker->>Redis: Update {status: completed, downloadUrl}
+    Worker->>Redis: Update status completed
 
-    User->>API: GET /v1/download/status/:jobId (poll)
+    User->>API: GET /v1/download/status/:jobId
     API->>Redis: Fetch job status
-    API-->>User: 200 {status: completed, downloadUrl}
+    API-->>User: 200 OK with downloadUrl
 
     User->>S3: GET downloadUrl
     S3-->>User: File download
@@ -47,13 +47,13 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-    subgraph Frontend["Frontend (React/Next.js)"]
+    subgraph Frontend["Frontend React/Next.js"]
         UI[Download UI]
         PollingService[Polling Service]
         ProgressBar[Progress Indicator]
     end
 
-    subgraph API["API Layer (Hono)"]
+    subgraph API["API Layer Hono"]
         InitEndpoint[POST /initiate]
         StatusEndpoint[GET /status/:jobId]
         CancelEndpoint[DELETE /cancel/:jobId]
@@ -70,7 +70,7 @@ graph TB
     subgraph Workers["Background Workers"]
         Worker1[Worker Instance 1]
         Worker2[Worker Instance 2]
-        Worker3[Worker Instance N...]
+        Worker3[Worker Instance N]
     end
 
     subgraph Storage["Object Storage"]
