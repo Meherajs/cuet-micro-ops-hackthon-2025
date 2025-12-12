@@ -1,8 +1,90 @@
+# =============================================================================
+# Docker Ignore File - Excludes files from Docker build context
+# =============================================================================
+
+# Dependencies (reinstalled during build)
 node_modules
 npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+
+# Git
 .git
 .gitignore
+.gitattributes
+
+# Environment files (secrets should not be in image)
 .env
 .env.*
+.env.local
+.env.*.local
+
+# Docker files (avoid recursive copy)
 docker
+Dockerfile*
+docker-compose*
+compose*.yml
+compose*.yaml
+
+# Documentation
 *.md
+docs/
+LICENSE
+
+# IDE and editor configs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.editorconfig
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files and coverage
+coverage/
+.nyc_output/
+*.test.ts
+*.spec.ts
+__tests__/
+test/
+tests/
+
+# Build artifacts
+dist/
+build/
+*.log
+
+# Scripts (not needed in container)
+scripts/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+.travis.yml
+Jenkinsfile
+
+# Linting and formatting configs
+.eslintrc*
+.prettierrc*
+.prettierignore
+eslint.config.*
+prettier.config.*
+
+# TypeScript config (only needed for dev)
+tsconfig*.json
+
+# Misc
+*.tgz
+*.tar.gz
+*.zip
+.npmrc
+.yarnrc
+
+# Local development artifacts
+minio-data/
+.agent/
