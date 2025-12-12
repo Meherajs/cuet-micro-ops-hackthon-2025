@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/Meherajs/cuet-micro-ops-hackthon-2025/compare/v1.0.0...v1.0.1) (2025-12-12)
+
+### 🐛 Bug Fixes
+
+- update Docker Hub username to x08a8 ([ab5e504](https://github.com/Meherajs/cuet-micro-ops-hackthon-2025/commit/ab5e504b60b631173c79668ca5b65d55bb41dfdc))
+
 ## 1.0.0 (2025-12-12)
 
 ### 🚀 Features
