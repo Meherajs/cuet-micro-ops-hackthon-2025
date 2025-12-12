@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/tamim2763/cuet-micro-ops-hackthon-2025/compare/v1.0.2...v1.1.0) (2025-12-12)
+
+### 🚀 Features
+
+- complete Phase 2 security scanning (CodeQL, Trivy, npm audit) and documentation ([065a952](https://github.com/tamim2763/cuet-micro-ops-hackthon-2025/commit/065a952536919d904fcbe45929e180a6f2093a69))
+
 ## [1.0.2](https://github.com/tamim2763/cuet-micro-ops-hackthon-2025/compare/v1.0.1...v1.0.2) (2025-12-12)
 
 ### 🐛 Bug Fixes
