@@ -13,7 +13,12 @@
     "format:check": "prettier --check .",
     "test:e2e": "node --experimental-transform-types scripts/run-e2e.ts",
     "docker:dev": "docker compose -f docker/compose.dev.yml up --build",
-    "docker:prod": "docker compose -f docker/compose.prod.yml up --build -d"
+    "docker:prod": "docker compose -f docker/compose.prod.yml up --build -d",
+    "security:audit": "npm audit --audit-level=moderate",
+    "security:audit:fix": "npm audit fix",
+    "security:audit:prod": "npm audit --omit=dev --audit-level=high",
+    "security:check": "npm run security:audit && echo 'Security check passed'",
+    "security:fix": "npm audit fix && npm run lint:fix && npm run format"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.948.0",

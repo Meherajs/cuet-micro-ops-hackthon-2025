@@ -1,6 +1,6 @@
 # Delineate Hackathon Challenge - CUET Fest 2025
 
-[![CI](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml)
+[![CI](https://github.com/Meherajs/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/Meherajs/cuet-micro-ops-hackthon-2025/actions/workflows/ci.yml)
 
 ## The Scenario
 
@@ -625,7 +625,7 @@ When contributing to this project:
 ### Viewing CI Results
 
 - **Check the badge** at the top of this README for current status
-- **View detailed logs** at: https://github.com/bongodev/cuet-micro-ops-hackthon-2025/actions
+- **View detailed logs** at: https://github.com/Meherajs/cuet-micro-ops-hackthon-2025/actions
 - **PR checks** show status directly in your pull request
 
 ### Troubleshooting CI Failures
@@ -636,6 +636,106 @@ When contributing to this project:
 | **Formatting errors**  | Run `npm run format` locally                              |
 | **Test failures**      | Check logs in Actions tab, run `npm run test:e2e` locally |
 | **Docker build fails** | Verify Dockerfile syntax and dependencies                 |
+
+---
+
+## 🔒 Security & Quality
+
+This project includes security scanning capabilities to ensure code security and dependency safety.
+
+### Security Scripts
+
+Run security checks locally before pushing:
+
+```bash
+# Check for vulnerable dependencies (moderate and above)
+npm run security:audit
+
+# Automatically fix vulnerable dependencies
+npm run security:audit:fix
+
+# Check production dependencies only (stricter - high and above)
+npm run security:audit:prod
+
+# Run complete security check
+npm run security:check
+
+# Fix all security issues + code formatting
+npm run security:fix
+```
+
+### Manual Security Scanning
+
+#### Using npm audit
+```bash
+# View all vulnerabilities
+npm audit
+
+# View as JSON for parsing
+npm audit --json
+
+# Fix automatically
+npm audit fix
+
+# Fix even breaking changes (use with caution)
+npm audit fix --force
+```
+
+#### Using Trivy (Docker required)
+```bash
+# Scan filesystem for vulnerabilities
+docker run --rm -v $(pwd):/scan aquasecurity/trivy:latest fs /scan
+
+# Scan Docker image
+docker build -f docker/Dockerfile.prod -t test-image .
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+  aquasecurity/trivy:latest image test-image
+
+# Scan for specific severity
+docker run --rm -v $(pwd):/scan \
+  aquasecurity/trivy:latest fs --severity CRITICAL,HIGH /scan
+```
+
+#### Check for Outdated Packages
+```bash
+# List outdated packages
+npm outdated
+
+# Update specific package
+npm update <package-name>
+
+# Update all packages (respecting semver)
+npm update
+```
+
+### Security Best Practices Implemented
+
+- ✅ **Dependency Locking**: All dependencies locked via `package-lock.json`
+- ✅ **Input Validation**: Zod schemas validate all API inputs
+- ✅ **Rate Limiting**: Prevents abuse via `hono-rate-limiter`
+- ✅ **Security Headers**: HSTS, X-Frame-Options, CSP headers configured
+- ✅ **CORS Configuration**: Configurable origin restrictions
+- ✅ **Request Timeout**: Prevents resource exhaustion
+- ✅ **Path Traversal Prevention**: S3 keys sanitized
+- ✅ **Error Tracking**: Sentry integration for production monitoring
+- ✅ **Distributed Tracing**: OpenTelemetry for request tracking
+
+### Vulnerability Response Policy
+
+| Severity | Response Time | Action |
+|----------|---------------|--------|
+| **CRITICAL** | Immediate (24h) | Hotfix + emergency deployment |
+| **HIGH** | 7 days | Include in next release |
+| **MEDIUM** | 30 days | Planned maintenance |
+| **LOW** | Next cycle | Backlog item |
+
+### Security Resources
+
+- **npm Security Advisories**: https://github.com/advisories
+- **Snyk Vulnerability Database**: https://snyk.io/vuln
+- **CVE Database**: https://cve.mitre.org
+- **Trivy Documentation**: https://aquasecurity.github.io/trivy
+- **OWASP Top 10**: https://owasp.org/www-project-top-ten
 
 ---
 
